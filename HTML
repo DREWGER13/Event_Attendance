@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Name and Number Selector</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      width: 200px;
+    }
+
+    .list-box {
+      border: 1px solid #ccc;
+      padding: 10px;
+      min-height: 150px;
+      overflow-y: auto;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      padding: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    li.selected {
+      background-color: #d0e7ff;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: red;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    input[type="text"] {
+      margin-top: 10px;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+
+    .check-btn {
+      margin-top: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      display: none;
+      background: none;
+      border: none;
+    }
+
+    .result-box {
+      border: 1px solid #ccc;
+      padding: 10px;
+      min-height: 150px;
+      width: 250px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Name List + Input -->
+  <div class="container">
+    <div class="list-box" id="nameBox">
+      <ul id="nameList"></ul>
+    </div>
+    <input type="text" id="nameInput" placeholder="Add a name" />
+  </div>
+
+  <!-- Number List + Confirm Button -->
+  <div class="container">
+    <div class="list-box" id="numberBox">
+      <ul id="numberList">
+        <!-- JS will populate 1–10 -->
+      </ul>
+    </div>
+    <button class="check-btn" id="confirmBtn" title="Confirm">&#10003;</button>
+  </div>
+
+  <!-- Result List -->
+  <div class="result-box">
+    <h3>Selected Pairs</h3>
+    <ul id="resultList"></ul>
+  </div>
+
+  <script>
+    const nameList = document.getElementById('nameList');
+    const nameInput = document.getElementById('nameInput');
+    const numberList = document.getElementById('numberList');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const resultList = document.getElementById('resultList');
+
+    let selectedName = null;
+    let selectedNumber = null;
+
+    // Utility: create a name list item
+    function createNameItem(name) {
+      const li = document.createElement('li');
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = name;
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '🗑️';
+      delBtn.className = 'delete-btn';
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (li === selectedName) {
+          selectedName = null;
+          updateConfirmBtn();
+        }
+        li.remove();
+      };
+
+      li.appendChild(nameSpan);
+      li.appendChild(delBtn);
+      li.onclick = () => {
+        if (selectedName) selectedName.classList.remove('selected');
+        selectedName = li;
+        li.classList.add('selected');
+        updateConfirmBtn();
+      };
+
+      return li;
+    }
+
+    // Add initial names
+    ['Anna', 'Bob', 'Charlie', 'Diana'].forEach(name => {
+      nameList.appendChild(createNameItem(name));
+    });
+
+    // Add names via input
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = nameInput.value.trim();
+        if (val) {
+          nameList.appendChild(createNameItem(val));
+          nameInput.value = '';
+        }
+      }
+    });
+
+    // Populate number list
+    for (let i = 1; i <= 10; i++) {
+      const li = document.createElement('li');
+      li.textContent = i;
+      li.onclick = () => {
+        if (selectedNumber) selectedNumber.classList.remove('selected');
+        selectedNumber = li;
+        li.classList.add('selected');
+        updateConfirmBtn();
+      };
+      numberList.appendChild(li);
+    }
+
+    // Update visibility of confirm button
+    function updateConfirmBtn() {
+      confirmBtn.style.display = (selectedName && selectedNumber) ? 'inline-block' : 'none';
+    }
+
+    // Confirm selection
+    confirmBtn.addEventListener('click', () => {
+      if (selectedName && selectedNumber) {
+        const pair = `${selectedName.firstChild.textContent} - ${selectedNumber.textContent}`;
+        const li = document.createElement('li');
+        li.textContent = pair;
+        resultList.appendChild(li);
+
+        // Remove name from list
+        selectedName.remove();
+        selectedName = null;
+
+        selectedNumber.classList.remove('selected');
+        selectedNumber = null;
+
+        updateConfirmBtn();
+      }
+    });
+  </script>
+</body>
+</html>
